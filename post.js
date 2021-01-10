@@ -1,31 +1,20 @@
 // POST
-const http = require("http");
-const port = 8080;
-
-const data = JSON.stringify({
-  myString: "My string",
-});
+const http = require('http');
 
 const options = {
-  hostname: "localhost",
-  port: port,
-  method: "POST",
-  headers: {
-    'WhatWillSaveTheWorld': 'Love',
-  },
-};
+    hostname: 'localhost',
+    port: 8080,
+    method: 'POST',
+    headers: {
+        'username': "ClintEastwood",
+        'iknowyoursecret': 'TheOwlAreNotWhatTheySeem'
+    }
+}
 
-const req = http.request(options, (res) => {
-  console.log(`statusCode: ${res.statusCode}`);
+const req = http.request(options);
 
-  res.on("data", (d) => {
-    process.stdout.write(d);
-  });
+req.on('error', error => {
+    console.error(error)
 });
 
-req.on("error", (error) => {
-  console.error(error);
-});
-
-req.write(data);
 req.end();
