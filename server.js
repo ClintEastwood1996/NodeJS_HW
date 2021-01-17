@@ -1,37 +1,50 @@
-const http = require("http");
 const port = 8080;
 const fs = require("fs");
 const DATABASE = "db.json";
+const express = require("express");
 
-const requestHandler = (request, response) => {
-  const NAMES = JSON.parse(fs.readFileSync(DATABASE, "utf-8"));
+const app = express();
 
-  if (request.method === "POST") {
-    if (request.headers.iknowyoursecret === "TheOwlAreNotWhatTheySeem") {
-      NAMES.unshift({
-        name: request.headers.username,
-        ip: request.connection.remoteAddress,
-      });
-      fs.writeFile(DATABASE, JSON.stringify(NAMES), (err) => {
-        if (err) {
-          throw err;
-        }
-      });
-      console.log(`Hello, ${NAMES[0].name}`);
-    } else {
-      console.log(`Hold on, you don't know my secret yet.`);
-    }
+const NAMES = JSON.parse(fs.readFileSync(DATABASE, "utf-8"));
+
+app.use((request, response, next) => {
+  if (request.method !== "POST") {
+    console.log("I see you are using wrong method");
+    response.end();
+  } else {
+    console.log("I see you are using right method");
+    next();
   }
+});
+
+app.post("/", (request, response, next) => {
+  if (request.headers.iknowyoursecret === "TheOwlAreNotWhatTheySeem") {
+    console.log("I'm glad you know my secret");
+    next();
+  } else {
+    console.log("Hold on, you don't know my secret yet.");
+    response.end();
+  }
+});
+
+app.post("/", (request, response, next) => {
+  const NAME = request.headers.username ? request.headers.username : "stranger";
+  const IP = request.connection.remoteAddress;
+
+  console.log(`You've been added to our database. Your name is ${NAME}, your ip is ${IP}`);
+
+  NAMES.unshift({
+    name: NAME,
+    ip: IP,
+  });
+
+  fs.writeFile(DATABASE, JSON.stringify(NAMES), (err) => {
+    if (err) {
+      throw err;
+    }
+  });
 
   response.end();
-};
-
-const server = http.createServer(requestHandler);
-
-server.listen(port, (err) => {
-  if (err) {
-    return console.log("something went wrong", err);
-  }
-
-  console.log(`server is listening on ${port}`);
 });
+
+app.listen(port, console.log(`Server is listening at port ${port}`));

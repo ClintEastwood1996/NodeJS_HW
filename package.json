@@ -1,0 +1,23 @@
+{
+  "name": "nodejs_hw",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ClintEastwood1996/NodeJS_HW.git"
+  },
+  "author": "Magomed Gasanov (magomed-gasanov1996@yandex.ru)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ClintEastwood1996/NodeJS_HW/issues"
+  },
+  "homepage": "https://github.com/ClintEastwood1996/NodeJS_HW#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
