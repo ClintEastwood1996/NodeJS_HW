@@ -1,12 +1,16 @@
 const port = 8080;
-const fs = require("fs");
-const DATABASE = "db.json";
+const { request } = require("express");
 const express = require("express");
+const mongoose = require("mongoose");
 
 const app = express();
 
-const NAMES = JSON.parse(fs.readFileSync(DATABASE, "utf-8"));
+// Connecting with mongoDB
+mongoose.connect("mongodb://localhost:27017");
+const UserSchema = mongoose.Schema({name: String, ip: String});
+const User = mongoose.model("Users", UserSchema);
 
+// Checking the request
 app.use((request, response, next) => {
   if (request.method !== "POST") {
     console.log("I see you are using wrong method");
@@ -17,6 +21,7 @@ app.use((request, response, next) => {
   }
 });
 
+// Checking the secret header
 app.post("/", (request, response, next) => {
   if (request.headers.iknowyoursecret === "TheOwlAreNotWhatTheySeem") {
     console.log("I'm glad you know my secret");
@@ -31,20 +36,25 @@ app.post("/", (request, response, next) => {
   const NAME = request.headers.username ? request.headers.username : "stranger";
   const IP = request.connection.remoteAddress;
 
-  console.log(`You've been added to our database. Your name is ${NAME}, your ip is ${IP}`);
-
-  NAMES.unshift({
-    name: NAME,
-    ip: IP,
-  });
-
-  fs.writeFile(DATABASE, JSON.stringify(NAMES), (err) => {
-    if (err) {
-      throw err;
+  // Save new user in MongoDb
+  const user = new User({name: NAME, ip: IP});
+  user.save((error, savedUser) => {
+    if (error) {
+      throw error;
     }
+    console.log(`You've been added to our database. Your name is ${savedUser.name}, your ip is ${savedUser.ip}`);
   });
+
 
   response.end();
 });
 
-app.listen(port, console.log(`Server is listening at port ${port}`));
+app.listen(port, () => {
+  console.log(`Server is listening at port ${port}`);
+  User.find({}, (err, users) => {
+    console.log(
+      "In the collection at the moment:",
+      users.map((u) => u.name).join(" ")
+    );
+  });
+});
